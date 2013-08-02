@@ -1,0 +1,7 @@
+option batch abort
+option confirm off
+open wangzp:minli85@b2.cvl.iis.u-tokyo.ac.jp
+put *.py
+put *.m
+put *.exe
+exit

@@ -1,0 +1,6 @@
+*.sdf
+ipch/*
+Release/*
+Debug/*
+bound/Release/*
+bound/Debug/*

@@ -1,0 +1,8 @@
+*.sdf
+ipch/*
+Release/*
+Debug/*
+x64/*
+clean/Release/*
+clean/Debug/*
+clean/x64/*
