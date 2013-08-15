@@ -1,8 +1,8 @@
-#define PT_per_L 11.0
-#define Stasdd_Num 217
+#define PT_per_L 80.0
+#define Stasdd_Num 50
 #define stdd_X 256.0
 #define stdd_Y 128.0
-#define featureDimension 64
+#define featureDimension 128
 
 #define feaNumlimit 17
 
@@ -45,6 +45,24 @@ struct DetRec
 		
 	};
 };
+
+obj smaller(obj to)
+{
+	obj o=to;
+	int xs=o.xmax-o.xmin;
+	int ys=o.ymax-o.ymin;
+	
+	xs = xs/20<3?3:xs/20;
+	ys = ys/20<3?3:ys/20;
+
+	o.xmax-=xs;
+	o.xmin+=xs;
+
+	o.ymax-=xs;
+	o.ymin+=xs;
+	return o;
+}
+
 template<class T>
 static pair<vector<vector<int> >, vector<T> > rangequery(obj o,const map<int,map<int,T> >& daset)
 {
@@ -99,8 +117,9 @@ static int area(const obj& o)
 }
 static int disp(obj o, const vector<int>& ref)
 {
-	double av=sqrt((double) area(o));
-	double st=av/PT_per_L;
+	double av=(double) area(o);
+
+	double st=sqrt(av/PT_per_L);
 
 	double dis=abs(st-(double) ref[0]);
 	int minx=0;
@@ -115,6 +134,8 @@ static int disp(obj o, const vector<int>& ref)
 	}
 	return minx;
 }
+
+
 
 
 static int disp(DetRec o, const vector<int>& ref)
@@ -139,6 +160,8 @@ static int disp(DetRec o, const vector<int>& ref)
 int countkptnumber(obj o,const vector<vector<int> >& intmap)
 {
 	int sx,sy,ex,ey;
+
+
 
 	int h=intmap.size();
 	int w=intmap[0].size();
@@ -191,7 +214,7 @@ pair<int,int> odisp(obj o,const vector< triple<vector<vector<T> >,map<int,map<in
 void writeOobj(obj o,const string& s,int wh, const vector<vector<int> > & cors, const vector<int>& inx,const vector<vector<double> > & feas)
 {
 	char td[40];
-	sprintf(td,"%s_objneg_%d",s.c_str(),wh);
+	sprintf(td,"%s_obj_%d",s.c_str(),wh);
 	string mys(td);
 	FILE* fp;
 	

@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <vector>
 #include <string>
-
+#include "..\..\..\fileIoinclude\FileInOut.h"
 using namespace std;
 
 struct Point
@@ -75,77 +75,90 @@ int main(int argc,char* argv[])
 	if (argc>1)
 	{
 		sprintf_s(tD,"%s",argv[1]);
-		bthresh=atoi(argv[2]);
-		thresh_edge=(double)atoi(argv[2])/10.0;
-		kptstep=atoi(argv[3]);
+	//	bthresh=atoi(argv[2]);
+	//	thresh_edge=(double)bthresh;
+	//	kptstep=atoi(argv[3]);
 	}
 	else
 	{
-		_chdir("E:\\CarData\\voc2007\\training\\car");
+		_chdir("E:\\CarData\\voc2007\\demo\\car");
 		sprintf_s(tD,"000007");
-		bthresh=30;
-		thresh_edge=5.0;
-		kptstep=7;
+	//	bthresh=30;
+	//	thresh_edge=(double)bthresh;
+	//	kptstep=7;
 	}
 	char tDf[40];
 	//char tDi[40];
 	sprintf_s(tDf,"%s_edge.txt",tD);
 
 	
+	vector<int> thrs= fileIOclass::InVectorInt("..\\..\\bndThreshld.txt");
 
+	vector<int> kspt=fileIOclass::InVectorInt("..\\..\\kptStep.txt");
 	
-
-	FILE* fp;
-	fp=fopen(tDf,"r");
-	int wid,heit;
-
-	fscanf_s(fp,"%d %d\n",&heit,&wid);
-
-
-	vector<vector<int>> edemap;
-	vector<int> edemap_;
-	edemap_.resize(wid,0);
-	edemap.resize(heit,edemap_);
-	int totalnum(0);
-
-	double value;
-	for (int i=0;i<heit;i++)
+	for(int j=0;j<kspt.size();j++)
 	{
-	
-		for (int j=0;j<wid;j++)
+	//int j=1;
+		for (int i = 0; i < thrs.size(); i++)
 		{
-			fscanf_s(fp,"%lf\t",&value);
-			if (value>thresh_edge*0.01)
+			kptstep=kspt[j];
+			bthresh=thrs[i];
+			thresh_edge=(double)bthresh;
+
+			FILE* fp;
+			fp=fopen(tDf,"r");
+			int wid,heit;
+
+			fscanf_s(fp,"%d %d\n",&heit,&wid);
+
+
+			vector<vector<int>> edemap;
+			vector<int> edemap_;
+			edemap_.resize(wid,0);
+			edemap.resize(heit,edemap_);
+			int totalnum(0);
+
+			double value;
+			for (int i=0;i<heit;i++)
 			{
-				totalnum+=1;
-				edemap[i][j]=1;
-			}
+	
+				for (int j=0;j<wid;j++)
+				{
+					fscanf_s(fp,"%lf\t",&value);
+					if (value>thresh_edge*0.01)
+					{
+						totalnum+=1;
+						edemap[i][j]=1;
+					}
 			
-		}
-		fscanf_s(fp,"\n");
-	}
-	fclose(fp);
+				}
+				fscanf_s(fp,"\n");
+			}
+			fclose(fp);
 	
 
 	
-	vector<Point> kpts;
+			vector<Point> kpts;
 
-	findkpts(edemap,kpts,kptstep*kptstep);
+			findkpts(edemap,kpts,kptstep*kptstep);
 
-	char tDi[40];
-	sprintf_s(tDi,"%s_bt%d_stp%d_kpts.txt",tD,bthresh,kptstep);
-	FILE* ouF;
-	ouF=fopen(tDi,"w");
-	if(kpts.size()>0)
-	{
-		fprintf(ouF,"%d\n",kpts.size());
-		for (int i = 0; i < kpts.size(); i++)
-		{
-			fprintf(ouF,"%d %d\t",kpts[i].x,kpts[i].y);
-		}
+			char tDi[40];
+			sprintf_s(tDi,"%s_bt%d_stp%d_kpts.txt",tD,bthresh,kptstep);
+			FILE* ouF;
+			ouF=fopen(tDi,"w");
+			if(kpts.size()>0)
+			{
+				fprintf(ouF,"%d\n",kpts.size());
+				for (int i = 0; i < kpts.size(); i++)
+				{
+					fprintf(ouF,"%d %d\t",kpts[i].x,kpts[i].y);
+				}
 		
+			}
+			fclose(ouF);
+		}
 	}
-	fclose(ouF);
+	
 
 
 	return 0; 

@@ -17,6 +17,101 @@
 
 using namespace std;
 
+static void kptstoNumKpFea( int thr, int stp,string s,triple< vector< vector<double>   > ,map<int,map<int, int > >, vector<vector<int> > >& rslt)
+{
+
+
+	vector<pair<int,int> > temkpts;
+
+	temkpts.clear();
+
+	rslt.feas.clear();
+
+
+	
+	char tD[40];
+	sprintf(tD,"%s_bt%d_stp%d",s.c_str(),thr,stp);
+	string mys(tD);
+
+	int tnum;
+
+	FILE *fp;
+	fp=fopen((mys+"_num.txt").c_str(),"r");
+	fscanf(fp,"%d",&tnum);
+	fclose(fp);
+
+	temkpts.resize(tnum,pair<int,int>(0,0));
+
+
+	fp=fopen((mys+"_fpts.txt").c_str(),"r");
+	for (int i = 0; i < temkpts.size(); i++)
+	{
+		fscanf(fp,"%d %d\n",&temkpts[i].first,&temkpts[i].second);
+	}
+	fclose(fp);
+
+	rslt.feas.resize(tnum,vector<double>(featureDimension,0.0));
+
+	fp=fopen((mys+"_feas.txt").c_str(),"r");
+	for (int i = 0; i < rslt.feas.size(); i++)
+	{
+		for (int j = 0; j < featureDimension; j++)
+		{
+			fscanf(fp,"%lf ",&rslt.feas[i][j]);
+		}
+		fscanf(fp,"\n");
+	}
+	fclose(fp);
+
+
+	//map<int,map<int, int > > kptFea;
+
+	rslt.kptFea.clear();
+
+	for (int i = 0; i < temkpts.size(); i++)
+	{
+		int a=temkpts[i].second;
+		if (rslt.kptFea.count(a)>0)
+		{
+			int b=temkpts[i].first;
+			rslt.kptFea[a].insert(pair<int,int>(b,i));
+		}
+		else
+		{
+			map<int, int > sth;
+			int b=temkpts[i].first;
+			sth.insert(pair<int,int>(b,i));
+			rslt.kptFea.insert(pair<int,map<int, int > >(a,sth));
+		}
+	}
+
+	
+
+	//auto sth=rangequery(10,0,200,300,rslt.kptFea);
+
+	//vector<vector<int> > intmap;
+
+	FILE* ouF;
+	ouF=fopen((mys+"_kptintg.txt").c_str(),"r");
+	
+	int heit,wid;
+	fscanf(ouF,"%d %d\n",&heit,&wid);
+	rslt.intmap.resize(heit,vector<int>(wid,0));
+
+	for (int i = 0; i < heit; i++)
+	{
+		for (int j = 0; j < wid; j++)
+		{
+			fscanf(fp,"%d ",&rslt.intmap[i][j]);
+		}
+		fscanf(fp,"\n");
+	}
+		
+	
+	fclose(ouF);
+	
+//	return rslt;
+}
 
 
 
@@ -46,15 +141,15 @@ void main(int argc, char* argv[])
 
 	vector<int> kspt=fileIOclass::InVectorInt("..\\..\\kptStep.txt");
 
-	vector<obj> bjs=fileIOclass::InVector<obj>(s+"_objs.txt");
-	vector<obj> objs;
-	objs.clear();
+	vector<obj> objs=fileIOclass::InVector<obj>(s+"_objs.txt");
+	//vector<obj> objs;
+	/*objs.clear();
 	for (int i = 0; i < bjs.size(); i++)
 	{
 		vector<obj> o=moveobj( bjs[i]);
 		objs.insert(objs.end(),o.begin(),o.end());
 	}
-
+	*/
 	
 	unordered_map<int,int> thrs_um;
 	unordered_map<int,int> kspt_um;
@@ -101,17 +196,16 @@ void main(int argc, char* argv[])
 	for (int i = 0; i < objs.size(); i++)
 	{
 		
-		auto gth=odisp(objs[i],infos[ks[i]]);
+		pair<int,int> gth=odisp( smaller( objs[i] ),infos[ks[i]],0);
 
-		if (gth.second>120)
-		{
-			int thi(gth.first) ;
+		
+		int thi(gth.first) ;
 
-			auto oneok=rangequery(objs[i],infos[ks[i]][thi].kptFea);
+		auto oneok=rangequery(smaller( objs[i]),infos[ks[i]][thi].kptFea);
 
-			writeOobj(objs[i],s,gi,oneok.first,oneok.second,infos[ks[i]][thi].feas);
-			gi+=1;
-		}
+		writeOobj(objs[i],s,gi,oneok.first,oneok.second,infos[ks[i]][thi].feas);
+		gi+=1;
+		
 		
 	}
 	
