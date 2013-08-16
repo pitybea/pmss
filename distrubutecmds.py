@@ -35,7 +35,7 @@ if __name__ == "__main__":
         
         ins.close()
         
-        allins.write('start \B %s%s%d.bat \n'%(everystring,ex,i))
+        allins.write('start /B %s%s%d.bat \n'%(everystring,ex,i))
     
     allins.close()
         
