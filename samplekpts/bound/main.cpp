@@ -146,7 +146,7 @@ int main(int argc,char* argv[])
 			sprintf_s(tDi,"%s_bt%d_stp%d_kpts.txt",tD,bthresh,kptstep);
 			FILE* ouF;
 			ouF=fopen(tDi,"w");
-			if(kpts.size()>0)
+		//	if(kpts.size()>0)
 			{
 				fprintf(ouF,"%d\n",kpts.size());
 				for (int i = 0; i < kpts.size(); i++)

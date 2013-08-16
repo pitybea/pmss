@@ -12,6 +12,7 @@ if __name__ == "__main__":
     icd=sys.argv[1]
     inm=int(sys.argv[2])
     ex=sys.argv[3]
+    exs=sys.argv[3:len(sys.argv)]
     ins=open(icd,'r')
     cds=[]
     
@@ -21,16 +22,20 @@ if __name__ == "__main__":
     ins.close()
     ecmd=split_list(cds,inm)
     
-    allins=open('allcmds%s%d'%(ex,inm),'wb')
+
+    everystring="everycmd"
+    
+    allins=open('allcmds%s%d.bat'%(ex,inm),'wb')
     
     for i in range(0,len(ecmd)):
-        ins=open('mycmd%s%d.bat'%(ex,i),'wb')
+        ins=open('%s%s%d.bat'%(everystring,ex,i),'wb')
         for acmd in ecmd[i]:
-            ins.write('%s\n'%(acmd))
+            for extt in exs:
+                ins.write('%s %s\n'%(extt,acmd))
         
         ins.close()
         
-        allins.write('start \B mycmd%s%d.bat \n'%(ex,i))
+        allins.write('start \B %s%s%d.bat \n'%(everystring,ex,i))
     
     allins.close()
         
