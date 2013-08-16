@@ -6,7 +6,11 @@
 #include <conio.h>
 
 #include <iostream>
-using namespace std;
+
+
+#include "..\..\..\fileIoinclude\FileInOut.h"
+#include  "..\..\common\detectCommon.h"
+
 #include <fstream>
 #include <stdio.h>
 #include <cv.h>
@@ -14,13 +18,16 @@ using namespace std;
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <vector>
-#include <string>
+
+
+
 
 #pragma comment(lib,"cxcore.lib")
 #pragma comment(lib,"cv.lib") 
 #pragma comment(lib,"ml.lib") 
 #pragma comment(lib,"highgui.lib")  
+
+
 
 char wndname[] = "Edge";
 
@@ -29,7 +36,7 @@ int edge_thresh = 60;
 
 vector<vector<double> > values;
 
-IplImage *image = 0, *edge = 0, *sh=0, *bound=0;
+IplImage *image = 0, *edge = 0, *sh=0, *bound=0,*pts=0;
 
 
 vector<vector<int> > rects;
@@ -44,6 +51,19 @@ void drawrecs(IplImage* simg)
 		}
 		else
 		cvRectangle(simg,cvPoint(rects[i][0],rects[i][1]),cvPoint(rects[i][2],rects[i][3]),cvScalar(255,255,0),2,8,0);
+	}
+}
+
+void drawobjs(IplImage*& igm,string s ,vector<obj> objs, vector<int> ks )
+{
+	for (int i = 0; i < objs.size(); i++)
+	{
+		auto pts=inptsForObj(objs[i],s,"",i);
+		int wid=ks[i]>45?45:ks[i];
+		for(auto pt:pts)
+		{
+			cvCircle(igm,cvPoint(pt.first,pt.second),wid,cvScalar(rand()%255,rand()%255,255),2,8,0);
+		}
 	}
 }
 
@@ -86,6 +106,10 @@ void on_trackbar(int h)
 
 	cvSetImageROI(sh,cvRect(0,image->height,image->width,image->height));
 	cvAdd(sh,bound,sh,NULL);
+
+	cvSetImageROI(sh,cvRect(image->width,image->height,image->width,image->height));
+	cvAdd(sh,pts,sh,NULL);
+
 
 	cvResetImageROI(sh);
 
@@ -140,6 +164,38 @@ struct mypoint
 
 int main(int argc,char* argv[])
 {
+	char tD[20];
+	if (argc>1)
+	{
+		sprintf_s(tD,"%s",argv[1]);
+
+	}
+	else
+	{
+		_chdir("E:\\carData\\voc2007\\training\\car");
+		sprintf_s(tD,"007815");
+	}
+
+	string ns(tD);
+	vector<obj> objs=fileIOclass::InVector<obj>(ns+"_objs.txt");
+
+
+	for (int i = 0; i < objs.size(); i++)
+	{
+		auto sth=inptsForObj(objs[i],ns,"",i);
+		if (sth.size()>=26 && objs[i].tror==0)
+		{
+			char td[40];
+			sprintf(td,"%s_obj%s_%d",ns.c_str(),"",i);
+			printf("%s\n",td);
+		}
+	}
+	//getchar();
+	return 0;
+}
+
+int main_(int argc,char* argv[])
+{
 
 	//D:\ethzshAllAngle\0
 	//_chdir("E:\\carData\\voc2007\\training\\car");
@@ -151,7 +207,23 @@ int main(int argc,char* argv[])
 	}
 	else
 	{
+		_chdir("E:\\carData\\voc2007\\training\\car");
 		sprintf_s(tD,"000007");
+	}
+
+	string ns(tD);
+	vector<obj> objs=fileIOclass::InVector<obj>(ns+"_objs.txt");
+	vector<int> kspt=fileIOclass::InVectorInt("..\\..\\kptStep.txt");
+
+	vector<int> ks;
+	ks.resize(objs.size(),0);
+
+
+
+	for (int i = 0; i < objs.size(); i++)
+	{
+		int ksi(disp(objs[i],kspt));
+		ks[i]=kspt[ ksi];
 	}
 
 	
@@ -247,12 +319,15 @@ int main(int argc,char* argv[])
 
 	if( (image = cvLoadImage(tDi, 1)) == 0 )
 		return -1;
+	if( (pts = cvLoadImage(tDi, 1)) == 0 )
+		return -1;
 
 	drawrecs(image);
 
 	sh = cvCreateImage(cvSize(image->width*2,image->height*2), IPL_DEPTH_8U, 3);
 	edge = cvCreateImage(cvSize(image->width,image->height), IPL_DEPTH_8U, 3);
 	bound = cvCreateImage(cvSize(image->width,image->height), IPL_DEPTH_8U, 3);
+//	pts = cvCreateImage(cvSize(image->width,image->height), IPL_DEPTH_8U, 3);
 
 	int index_c(0);
 	if (traces.size()>0)
@@ -271,6 +346,9 @@ int main(int argc,char* argv[])
 		}
 	}
 	drawrecs(bound);
+
+	drawobjs(pts,ns,objs,ks);
+
 	cvNamedWindow(wndname, 1);
 	cvCreateTrackbar(tbarname, wndname, &edge_thresh, 1000, on_trackbar);
 
@@ -282,6 +360,7 @@ int main(int argc,char* argv[])
 	cvReleaseImage(&image);
 	cvReleaseImage(&edge);
 	cvReleaseImage(&sh);
+	cvReleaseImage(&pts);
 
 	cvDestroyWindow(wndname);
 

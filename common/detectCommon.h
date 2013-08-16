@@ -1,3 +1,11 @@
+#include <vector>
+#include <string>
+#include <map>
+using namespace std;
+
+#include <stdio.h>
+#include <stdlib.h>
+
 #define PT_per_L 80.0
 #define Stasdd_Num 50
 #define stdd_X 256.0
@@ -210,11 +218,48 @@ pair<int,int> odisp(obj o,const vector< triple<vector<vector<T> >,map<int,map<in
 	return pair<int,int>(properindex,feasnum);
 }
 
+static vector<pair<int,int> > inptsForObj(obj o, const string& s, const string& extrs,int wh)
+{
+	vector<pair<int,int> > rslt;
 
-void writeOobj(obj o,const string& s,int wh, const vector<vector<int> > & cors, const vector<int>& inx,const vector<vector<double> > & feas)
+	char td[40];
+	sprintf(td,"%s_obj%s_%d",s.c_str(),extrs.c_str(),wh);
+	string mys(td);
+
+	int siz_;
+	FILE* fp;
+	
+	fp=fopen((mys+"_num.txt").c_str(),"r");
+	fscanf(fp,"%d",&siz_);
+	fclose(fp);
+
+	rslt.resize(siz_,pair<int,int>(0,0));
+
+	vector<	pair<double,double> > pts;
+	pts.resize(siz_,pair<double,double>( 0.0,0.0));
+
+	fp=fopen((mys+"_pts.txt").c_str(),"r");
+	for (int i = 0; i < siz_; i++)
+	{
+		fscanf(fp,"%lf %lf\n",&pts[i].first,&pts[i].second);
+	}
+	fclose(fp);
+
+	double ratiox(stdd_X/(double)(o.xmax-o.xmin)),ratioy(stdd_Y/(double)(o.ymax-o.ymin));
+
+	for (int i = 0; i < siz_; i++)
+	{
+		rslt[i].first=o.xmin + pts[i].first/ratiox;
+		rslt[i].second=o.ymin + pts[i].second/ratioy;
+	}
+
+	return rslt;
+}
+
+void writeOobj(obj o,const string& s, const string& extrs ,int wh, const vector<vector<int> > & cors, const vector<int>& inx,const vector<vector<double> > & feas)
 {
 	char td[40];
-	sprintf(td,"%s_obj_%d",s.c_str(),wh);
+	sprintf(td,"%s_obj%s_%d",s.c_str(),extrs.c_str(),wh);
 	string mys(td);
 	FILE* fp;
 	
