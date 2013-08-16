@@ -328,8 +328,7 @@ void main(int argc, char* argv[])
 	
 	writeDetvecs();
 
-	vector<DetRec> arcs;
-	arcs=fileIOclass::InVector<DetRec>("..\\..\\detRecs.txt");
+	vector<DetRec> arcs =fileIOclass::InVector<DetRec>("..\\..\\detRecs.txt");
 
 
 	
