@@ -6,13 +6,13 @@ using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
 
-#define PT_per_L 80.0
-#define Stasdd_Num 50
+#define PT_per_L 40.0
+#define Stasdd_Num 26
 #define stdd_X 256.0
 #define stdd_Y 128.0
 #define featureDimension 128
 
-#define feaNumlimit 17
+#define feaNumlimit 21
 
 struct obj
 {

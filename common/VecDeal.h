@@ -7,6 +7,7 @@
 
 using namespace std;
 
+#pragma warning(disable: 4996) /* Disable deprecation */
 
 
 #include <set>

@@ -21,5 +21,8 @@
     <ClCompile Include="..\..\..\fileIoinclude\FileIO.cpp">
       <Filter>资源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\common\myhog.cpp">
+      <Filter>资源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

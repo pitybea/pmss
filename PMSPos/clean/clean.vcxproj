@@ -147,6 +147,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\fileIoinclude\FileIO.cpp" />
+    <ClCompile Include="..\..\common\bigint\BigInteger.cc" />
+    <ClCompile Include="..\..\common\bigint\BigIntegerAlgorithms.cc" />
+    <ClCompile Include="..\..\common\bigint\BigIntegerUtils.cc" />
+    <ClCompile Include="..\..\common\bigint\BigUnsigned.cc" />
+    <ClCompile Include="..\..\common\bigint\BigUnsignedInABase.cc" />
     <ClCompile Include="..\..\common\PMS.cpp" />
     <ClCompile Include="adaboost.cpp" />
     <ClCompile Include="Source.cpp" />

@@ -10,6 +10,7 @@
 
 #include "..\..\..\fileIoinclude\FileInOut.h"
 #include  "..\..\common\detectCommon.h"
+#include "..\..\common\myhog.h"
 
 #include <fstream>
 #include <stdio.h>
@@ -162,7 +163,7 @@ struct mypoint
 	};
 };
 
-int main(int argc,char* argv[])
+int givepositivelist(int argc,char* argv[])
 {
 	char tD[20];
 	if (argc>1)
@@ -183,7 +184,7 @@ int main(int argc,char* argv[])
 	for (int i = 0; i < objs.size(); i++)
 	{
 		auto sth=inptsForObj(objs[i],ns,"",i);
-		if (sth.size()>=26 && objs[i].tror==0)
+		if (sth.size()>= feaNumlimit && objs[i].tror==0)
 		{
 			char td[40];
 			sprintf(td,"%s_obj%s_%d",ns.c_str(),"",i);
@@ -194,7 +195,7 @@ int main(int argc,char* argv[])
 	return 0;
 }
 
-int main_(int argc,char* argv[])
+int showmain(int argc,char* argv[])
 {
 
 	//D:\ethzshAllAngle\0
@@ -364,5 +365,81 @@ int main_(int argc,char* argv[])
 
 	cvDestroyWindow(wndname);
 
+	return 0;
+}
+
+void testmyhog(int argc,char* argv[])
+{
+	char tD[20];
+	if (argc>1)
+	{
+		sprintf(tD,"%s",argv[1]);
+
+	}
+	else
+	{
+		_chdir("E:\\carData\\voc2007\\training\\car");
+		sprintf(tD,"000007");
+	}
+
+	string ns(tD);
+	char tDf[20];
+	sprintf(tDf,"%s_edge.txt",tD);
+	FILE* fp;
+	fp=fopen(tDf,"r");
+	int wid,heit;
+
+	fscanf(fp,"%d %d\n",&heit,&wid);
+
+
+
+//	values=new double*[heit];
+	values.resize(heit,vector<double>(wid,0.0));
+	
+
+
+	for (int i=0;i<heit;i++)
+	{
+		//values[i]=new double[wid];
+		for (int j=0;j<wid;j++)
+		{
+			//double temt;
+			fscanf(fp,"%lf ",&values[i][j]);
+			//=temt;
+
+		}
+		fscanf(fp,"\n");
+	}
+	fclose(fp);
+	vector<vector<vector<int> > > hogIntr=generateHogIntegrateFromEdgeMap(values);
+
+	char tDff[20];
+	sprintf(tDff,"%s_hogInte.txt",tD);
+	//FILE* fp;
+	fp=fopen(tDff,"w");
+	int sa=Number_SignleHog;
+	fprintf(fp,"%d %d %d\n",heit,wid,sa);
+	for (int i = 0; i < heit; i++)
+	{
+		for (int j = 0; j < wid; j++)
+		{
+			for (int k = 0; k < sa; k++)
+			{
+				fprintf(fp,"%d ",hogIntr[i][j][k]);
+			}
+
+		}
+		fprintf(fp,"\n");
+	}
+	fclose(fp);
+
+}
+
+int main(int argc,char* argv[])
+{
+//	showmain(argc,argv);
+
+//	testmyhog(argc,argv);
+	givepositivelist(argc,argv);
 	return 0;
 }

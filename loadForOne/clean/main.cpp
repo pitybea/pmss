@@ -233,7 +233,8 @@ void genpositive(int argc, char* argv[])
 }
 
 
-int  main(int argc, char* argv[])
+
+int  gennegative(int argc, char* argv[])
 {
 	string s;
 	
@@ -271,12 +272,16 @@ int  main(int argc, char* argv[])
 	fclose(fp);
 
 	srand((unsigned)time(0)); 
-	for (int i = 0; i < 30; i++)
+	for (int i = 0; i < 140; i++)
 	{
 	
 		DetRec dr = arcs[rand()%arcs.size()];
 		
 
+		if ((dr.w==widh)||(dr.h==heit))
+		{
+			continue;
+		}
 
 		int cx=rand()%(widh-dr.w);
 
@@ -299,8 +304,7 @@ int  main(int argc, char* argv[])
 
 	}
 
-	if(objs.size()==0)
-		return -1;
+	
 
 	/*objs.clear();
 	for (int i = 0; i < bjs.size(); i++)
@@ -357,7 +361,7 @@ int  main(int argc, char* argv[])
 		
 		pair<int,int> gth=odisp( smaller( objs[i] ),infos[ks[i]],0);
 
-		if (gth.second>28)
+		if (gth.second>feaNumlimit)
 		{
 			int thi(gth.first) ;
 
@@ -373,4 +377,12 @@ int  main(int argc, char* argv[])
 
 	return 0;
 	
+}
+
+
+int  main(int argc, char* argv[])
+{
+//	genpositive(argc,argv);
+	gennegative(argc,argv);
+	return 0;
 }

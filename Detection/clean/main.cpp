@@ -191,7 +191,7 @@ static void kptstoNumKpFea( int thr, int stp,string s,triple<vector<vector<pair<
 //	return rslt;
 }
 
-void writefss(int argc, char* argv[])
+void main(int argc, char* argv[])
 {
 	string s;
 	
@@ -201,8 +201,8 @@ void writefss(int argc, char* argv[])
 	
 	if (argc==1)
 	{
-		_chdir("E:\\CarData\\voc2007\\demo\\car");
-		s="000007";
+		_chdir("E:\\CarData\\voc2007\\tem\\car");
+		s="000082";
 
 	}
 	else
@@ -218,6 +218,7 @@ void writefss(int argc, char* argv[])
 
 	vector<int> kspt=fileIOclass::InVectorInt("..\\..\\kptStep.txt");
 
+	//feasToIntPairs(85,7,s,ped);
 	for(int j=0;j<kspt.size();j++)
 	{	
 		for (int i = 0; i < thrs.size(); i++)
@@ -299,7 +300,7 @@ pair<vector<dtctHy>,vector<double> > detectBst100(DetRec drc, int height,int wid
 }
 
 
-void main(int argc, char* argv[])
+void maindete(int argc, char* argv[])
 {
 	string s;
 	

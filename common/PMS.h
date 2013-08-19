@@ -1,6 +1,11 @@
 #include "VecDeal.h"
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 
+#include "..\common\bigint\BigIntegerLibrary.hh"
 
+typedef __int64 LInt;
 
 
 
@@ -31,25 +36,57 @@ static vector<vector<pair<int,int> > > genPAorders(int n)
 	return rslt;
 };
 
+
+static vector<pair<int,int> >  genPAorders(int n,int ann)
+{
+	int m=(n-1)+(ann-1);
+
+	vector<pair<int,int> >  rslt;
+
+	for (int i = m; i >=0; i--)
+	{
+	//	vector<pair<int,int> > lvl;
+	//	lvl.clear();
+
+		int s=((i>=(n-1))?(n-1):i);
+	
+		int t=i-s;
+
+		while ( (t>=1) && (s<=(n-1)) && (t<=(ann-1)) && (s>=0) )
+		{
+			rslt.push_back(pair<int,int>(s,t));
+			s-=1;
+			t=i-s;
+		}
+
+
+	//	rslt.push_back(lvl);
+
+	}
+	return rslt;
+};
+
 class PMStruc
 {
 public:
 
 
 	PMStruc(){};
-	PMStruc(int);
+	PMStruc(int,int);
 
 
 	 
 	int generatePymFromdata(const vector<vector<double> >& data,int);
 	
-	double givePyramidMatchScore(const vector<vector<double> >& dataset,bool ExcluMode,vector<double>& scoreAllLevel);
+	double givePyramidMatchScore(const vector<vector<double> >& dataset,bool ExcluMode,vector< double>  & scoreAllLevel);
 
-	double givePyramidMatchScore(const vector<vector<pair<int,int> > >& vecFSs,const vector<vector<double> >& poss,bool ExcluMode,vector<double>& scoreAllLevel);
+	double givePyramidMatchScore(const vector<vector<pair<LInt,LInt> > >& vecFSs,const vector<vector<double> >& poss,bool ExcluMode,vector< double>  & scoreAllLevel);
 
-	double givePyramidMatchScoreSpecial(const vector<vector<pair<int,int> > >& vecFSs,const vector<vector<double>>& poss,const vector<int>& indx,bool ExcluMode,vector<int>& every);
+	double givePyramidMatchScoreSpecial(const vector<vector<pair<LInt,LInt> > >& vecFSs,const vector<vector<double>>& poss,const vector<int>& indx,bool ExcluMode,vector<pair<int,int> >& every);
 
-	int initPymWithABs(vector<vector<pair<double,double> > > abS,int dimension);
+	double giveNewPyramidMatchScore(const vector<vector<double > >& vecFSs,bool ExcluMode,vector< double>  & scoreAllLevel);
+
+	//int initPymWithABs(vector<vector<pair<double,double> > > abS,int dimension);
 	int AddoneData(vector<double> data,bool AddOrMinus);
 	int AddSeverlData(vector<vector<double> > data,bool AddorMinus);
 
@@ -57,54 +94,64 @@ public:
 
 	int GeneratePosWeightWithParameter(double ratio);
 	
-	vector<pair<int,int> > dataToTwoInxs(vector<double> data);
+	vector<pair<LInt,LInt> > dataToTwoInxs(vector<double> data);
 
 	static void printTofile(const PMStruc& pm,string s);
 	static void loadFromfile(PMStruc& pm,string s);
 
-	vector<double> weights;
+	vector<vector< double> > weights;
 	int getadim(){return adimension;};
-	int getlvlmt(){return LevelLimit;};
+	//int getlvlmt(){return LevelLimit;};
 
 
 private:
 
 	int dataToPym(const vector<vector<double> >& data);
 
-	bool dataToPymLvl(const vector<vector<double> >& datas,int lvel);
+	bool dataToPymLvl(const vector<vector<double> >& datas,int alvel,int plvel);
 
 
 
-	double MatchDttoPosPymSimple(const vector<vector<double> >& dataset,bool ExcluMode,vector<double> & mnumbers,bool inverse);
+	double MatchDttoPosPymSimple(const vector<vector<double> >& dataset,bool ExcluMode,vector< double>  & mnumbers,bool inverse);
 
-	double MatchDttoPosPymSimple(const vector<vector<pair<int,int> > >& vecFSs,const vector<vector<double> >& poss,bool ExcluMode,vector<double> & mnumbers,bool inverse);
+	double MatchDttoPosPymSimple(const vector<vector<pair<LInt,LInt> > >& vecFSs,const vector<vector<double> >& poss,bool ExcluMode,vector< double>  & mnumbers,bool inverse);
 
-	double MatchDttoPosPymSimple(const vector<vector<pair<int,int> > >& vecFSs,const vector<vector<double>>& poss,const vector<int>& indx,bool ExcluMode,vector<int>& every,bool inverse);
+	double MatchDttoPosPymSimple(const vector<vector<pair<LInt,LInt> > >& vecFSs,const vector<vector<double>>& poss,const vector<int>& indx,bool ExcluMode,vector<pair<int,int> >& every,bool inverse);
 
+
+	double newMatchDttoPosPymSimple(const vector<vector<double > >& vecFSs,bool ExcluMode,vector< double>  & mnumbers,bool inverse);
 	
-	int matchDToOneLvSimple(const vector<vector<pair<int,int> > >& vecFSs,const vector<vector<double> >& poss,int levl, bool ExcluMode,vector<bool>& used );
+	int matchDToOneLvSimple(const vector<vector<pair<LInt,LInt> > >& vecFSs,const vector<vector<double> >& poss,int alevl,int plevl, bool ExcluMode,vector<bool>& used );
 
-	int matchDToOneLvSimple(const vector<vector<pair<int,int> > >& vecFSs,const vector<vector<double> >& poss,const vector<int>& indx ,int levl, bool ExcluMode,vector<bool>& used,vector<int>& every );
+	int newmatchDToOneLvSimple(const vector<vector<double > >& vecFSs,int alevl,int plevl, bool ExcluMode,vector<bool>& used );
 
-	pair<int,int>  dataToTwoInxWthoutPos(int alvel,vector<double> data);
+	int matchDToOneLvSimple(const vector<vector<pair<LInt,LInt> > >& vecFSs,const vector<vector<double> >& poss,const vector<int>& indx ,int alevl,int plevl, bool ExcluMode,vector<bool>& used,vector<pair<int,int>>& every );
 
-	pair<int,int> dataToTwoPosInx(int lvel,vector<double> data);
-	pair<int,int> dataToTwoPosInx(int lvel,vector<double> data,vector<pair<int,int> > inp);
+	pair<LInt,LInt>  dataToTwoInxWthoutPos(int alvel,vector<double> data);
 
-	pair<int,int> lvelToAPlvel(int);
+	pair<LInt,LInt> dataToTwoPosInx(int alvel,int plvel,vector<double> data);
+
+	pair<LInt,LInt> dataToTwoPosInx(int alvel,int plvel,vector<double> data,vector<pair<LInt,LInt> > inp);
+
+	vector<int> dataToAIntVec(int alvel,int plvel,vector<double> data);
 
 
-	vector<unordered_map<int,unordered_map<int,int> > > pym;
+	vector<vector<  unordered_map<LInt,unordered_map<LInt,int> > > > pym;
+
+
+	vector<vector<  map<vector<int>, int > > > newpym;
 
 	vector<vector<pair<double,double> > > aAbs;
 
 	int adimension;
-	int LevelLimit;// 6
+	int aLevelLimit;
+	int pLevelLimit;// 6
+
 	int twExMs;
-	vector<int> twoExs;
+	vector<LInt> twoExs;
 	
 
-	vector<vector<pair<int,int> > > paOrders;
+	vector<pair<int,int> >  paOrders;
 };
 
 class PMSEnsemble
@@ -114,7 +161,7 @@ public:
 	vector<vector<double>> weights;
 	int generateAaBsFromdata(vector<vector<double> > data,int);
 
-	int generateStructureFromData(vector<vector<vector<double> > > data);
+	//int generateStructureFromData(vector<vector<vector<double> > > data);
 	double givePyramidMatchScore(vector<vector<double> > dataset);
 	
 	vector<vector<pair<double,double> > > aAbs;
@@ -202,3 +249,64 @@ static vector<vector<double > > prepareData(vector<featype> allfeas, vector<vect
 	return dats;
 }
 
+
+static void printPR(vector<double> pos,vector<double> neg)
+{
+	vector<double> al;
+	al.clear();
+
+	vector<int> inx;
+	inx.clear();
+
+	al.insert(al.end(),pos.begin(),pos.end());
+	al.insert(al.end(),neg.begin(),neg.end());
+
+	vector<int> ti;
+	ti.resize(pos.size(),1);
+
+	inx.insert(inx.end(),ti.begin(),ti.end());
+
+	ti.clear();
+
+	ti.resize(neg.size(),-1);
+	inx.insert(inx.end(),ti.begin(),ti.end());
+	
+	vector<int> i__;
+	i__.resize(inx.size(),0);
+	for (int i = 0; i < inx.size(); i++)
+	{
+		i__[i]=i;
+
+	}
+
+	prshl(al,(int)al.size(),i__);
+
+	int nnum=0;
+	int pnum=0;
+	
+	int allp=(int)pos.size();
+
+	int az= (int)	inx.size();
+
+	for (int i = 0; i < inx.size(); i++)
+	{
+		if (inx[i__[i]]==1)
+		{
+			pnum+=1;
+		}
+		else
+		{
+			nnum+=1;
+		}
+		
+		int crrctNum=nnum+allp-pnum;
+
+		int dtnum=allp-pnum;
+
+		if (i>0 && i<(az-1))
+		{
+			printf("%lf %lf\n", (double)dtnum / (double)allp, (double)dtnum / (double)(az-i-1) );
+		}
+
+	}
+}

@@ -59,7 +59,70 @@ void dimrc(string s,vector<vector<double> > pcamatrix)
 	fclose(fp);
 }
 
-int main1(int argc,char* argv[])
+
+void toPtSet(string s,vector<vector<double> > pcamatrix)
+{
+	int tnum;
+	FILE* fp;
+	fp=fopen((s+"_num.txt").c_str(),"r");
+	fscanf(fp,"%d",&tnum);
+	fclose(fp);
+
+	vector<vector<double> >feas;
+	feas.clear();
+	feas.resize(tnum,vector<double> (featureDimension,0.0));
+
+	fp=fopen((s+"_feas.txt").c_str(),"r");
+	for (int i = 0; i < tnum; i++)
+	{
+		for (int j = 0; j < featureDimension; j++)
+		{
+			fscanf(fp,"%lf ",&feas[i][j]);
+		}
+		fscanf(fp,"\n");
+	}
+	fclose(fp);
+
+	ZeroMnVec(feas);
+
+	vector<vector<double> > opp=TransitMtx(feas,pcamatrix);
+
+
+	vector<vector<double> > poss;
+	poss.resize(tnum,vector<double> (2,0.0));
+
+	fp=fopen((s+"_pts.txt").c_str(),"r");
+	for (int i = 0; i < tnum; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			fscanf(fp,"%lf ",&poss[i][j]);
+		}
+		fscanf(fp,"\n");
+	}
+	fclose(fp);
+
+
+	fp=fopen((s+"_ptscpp.txt").c_str(),"w");
+
+	fprintf(fp,"%d %d\n",opp.size(),featureDimension + 1);
+	for (int i = 0; i < opp.size(); i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			fprintf(fp,"%lf ",poss[i][j]);
+		}
+		for (int j = 0; j < opp[i].size(); j++)
+		{
+		
+			fprintf(fp,"%lf ",opp[i][j]);
+		}
+		fprintf(fp,"\n");
+	}
+	fclose(fp);
+}
+
+int main2(int argc,char* argv[])
 {
 	//
 	char tD[40];
@@ -102,6 +165,47 @@ int main1(int argc,char* argv[])
 
 
 int main(int argc,char* argv[])
+{
+	//
+	char tD[40];
+
+
+	if (argc>1)
+	{
+		sprintf_s(tD,"%s",argv[1]);
+
+	}
+	else
+	{
+		_chdir("E:\\carData\\voc2007\\transfer");
+		sprintf_s(tD,"000012_obj_0");
+	
+	}
+
+	vector<vector<double> > pcamatrix;
+	pcamatrix.clear();
+	pcamatrix.resize(featureDimension,vector<double>(featureDimension-1,0.0));
+	FILE* fp=fopen("pcaMatrix.txt","r");
+	for (int i = 0; i < featureDimension; i++)
+	{
+		for (int j = 0; j < featureDimension-1; j++)
+		{
+			fscanf(fp,"%lf ",&pcamatrix[i][j]);
+		}
+		fscanf(fp,"\n");
+	}
+	fclose(fp);
+
+
+	string s(tD);
+
+	toPtSet (s,pcamatrix);
+
+
+	return 0; 
+}
+
+int main1(int argc,char* argv[])
 {
 	//
 //	char tD[40];
