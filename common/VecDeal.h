@@ -87,6 +87,27 @@ static void prshl(vector<T> p,int n,vector<int>& index)
 	}
 };
 
+template<class T>
+static void FromSmall(vector<T> p,int n,vector<int>& index)
+{
+	int k,j,i;
+	T t;
+	int ii;
+	k=n/2;
+	while(k>0)
+	{
+		for(j=k;j<=n-1;j++)
+		{
+			t=p[j];  ii=index[j];  i=j-k;
+			while((i>=0)&&(p[i]>t))
+			{
+				p[i+k]=p[i];  index[i+k]=index[i];  i=i-k;
+			}
+			p[i+k]=t;  index[i+k]=ii;
+		}
+		k=k/2;
+	}
+};
 
 
 template <class T,class U>

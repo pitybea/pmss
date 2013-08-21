@@ -89,8 +89,12 @@ PMStruc::PMStruc( int alvlimt,int plvlimt)
 
 	aLevelLimit= alvlimt;
 	pLevelLimit=plvlimt;
-	paOrders=genPAorders(aLevelLimit,pLevelLimit);
-	
+	paOrders=genPAordersNew(aLevelLimit,pLevelLimit);
+	for (auto ss:paOrders)
+	{
+		printf("(%d,%d) ",ss.first,ss.second);
+	}
+	printf("\n");
 	
 }
 
@@ -359,9 +363,9 @@ bool PMStruc::dataToPymLvl(const vector<vector<double> >& datas,int alvel,int pl
 		}
 		else
 		{
-			unordered_map<LInt,int> temlv;
+			mapType<LInt,int> temlv;
 			temlv.insert(pair<LInt,int>(secI,1));
-			pym[alvel][plvel].insert(pair<LInt,unordered_map<LInt,int> >(fisI,temlv));
+			pym[alvel][plvel].insert(pair<LInt,mapType<LInt,int> >(fisI,temlv));
 		}
 
 		auto vk=dataToAIntVec(alvel,plvel,datas[i]);
@@ -405,16 +409,16 @@ int invdvalue(double a,vector<double> inv)
 	return re;
 }
 
-unordered_map<LInt,unordered_map<LInt,int> > loadPyramidLv(FILE* fp)
+mapType<LInt,mapType<LInt,int> > loadPyramidLv(FILE* fp)
 {
-	unordered_map<LInt,unordered_map<LInt,int> > result;
+	mapType<LInt,mapType<LInt,int> > result;
 	int pymlvS;
 	fscanf(fp,"%d\n",&pymlvS);
 	for (int i = 0; i < pymlvS; i++)
 	{
 		int a,bS;
 		fscanf(fp,"%d %d\n",&a,&bS);
-		unordered_map<LInt,int> b;
+		mapType<LInt,int> b;
 		for (int j = 0; j < bS; j++)
 		{
 			int ta,tb;
@@ -422,13 +426,13 @@ unordered_map<LInt,unordered_map<LInt,int> > loadPyramidLv(FILE* fp)
 			b.insert(pair<int,int>(ta,tb));
 		}
 
-		result.insert(pair<LInt,unordered_map<LInt,int> >(a,b));
+		result.insert(pair<LInt,mapType<LInt,int> >(a,b));
 		fscanf(fp,"\n");
 	}
 	return result;
 }
 
-void printPyramidLv(unordered_map<LInt,unordered_map<LInt,int> > pymlv,FILE* fp)
+void printPyramidLv(mapType<LInt,mapType<LInt,int> > pymlv,FILE* fp)
 {
 	fprintf(fp,"%d\n",pymlv.size());
 	for(auto ii=pymlv.begin(); ii!=pymlv.end(); ++ii)
@@ -471,7 +475,7 @@ void printAandBs(vector<pair<double,double> > abs,FILE* fp)
 }
 
 /*
-vector<unordered_map<int,unordered_map<int,int> > > pym;
+vector<mapType<int,mapType<int,int> > > pym;
 
 	vector<vector<pair<double,double> > > aAbs;
 
@@ -553,7 +557,7 @@ void PMStruc:: loadFromfile(PMStruc& pm,string s)
 		//printAandBs(pm.aAbs[i],fp);
 	}
 	fscanf(fp,"\n");
-	pm.pym.resize(pm.aLevelLimit,vector<unordered_map<LInt,unordered_map<LInt,int> > >(pm.pLevelLimit,unordered_map<LInt,unordered_map<LInt,int> >() ));
+	pm.pym.resize(pm.aLevelLimit,vector<mapType<LInt,mapType<LInt,int> > >(pm.pLevelLimit,mapType<LInt,mapType<LInt,int> >() ));
 	for (int i = 0; i < pm.aLevelLimit; i++)
 	{
 		for (int j = 0; j < pm.pLevelLimit; j++)
@@ -653,7 +657,7 @@ int PMStruc::dataToPym(const vector<vector<double> >& data)
 
 	
 		weights.resize(aLevelLimit,vector<double>(pLevelLimit,0.0));
-		pym.resize(aLevelLimit,vector<unordered_map<LInt,unordered_map<LInt,int> > >(pLevelLimit,unordered_map<LInt,unordered_map<LInt,int> >() ));
+		pym.resize(aLevelLimit,vector<mapType<LInt,mapType<LInt,int> > >(pLevelLimit,mapType<LInt,mapType<LInt,int> >() ));
 
 		newpym.resize(aLevelLimit,vector<map<vector<int>,int> >(pLevelLimit,map<vector<int>,int>()));
 
@@ -665,7 +669,7 @@ int PMStruc::dataToPym(const vector<vector<double> >& data)
 				double awt= sqrt(pow2[i]);
 				double pwt= sqrt(pow2[j]);
 
-				weights[i][j]=awt*pwt;
+				weights[i][j]=pwt;
 			}
 		}
 		
@@ -816,7 +820,7 @@ int PMStruc:: matchDToOneLv(vector<vector<double> > &dataset,int levl,map<int,ma
 */
 int PMStruc::matchDToOneLvSimple(const vector<vector<pair<LInt,LInt> > >& vecFSs,const vector<vector<double>>& poss,const vector<int>& indx ,int alevl,int plevl, bool ExcluMode,vector<bool>& used,vector<pair<int,int> > & every )
 {
-	auto siz=indx.size();
+	int siz=(int)indx.size();
 	int res(0);
 
 	//auto pym[levl]=pym[levl];
@@ -825,7 +829,7 @@ int PMStruc::matchDToOneLvSimple(const vector<vector<pair<LInt,LInt> > >& vecFSs
 	{
 		if(!used[i])
 		{
-			pair<int,int> ss;
+			pair<LInt,LInt> ss;
 	
 			ss=dataToTwoPosInx(alevl,plevl,poss[i],vecFSs[indx[i]]);
 
@@ -1000,14 +1004,11 @@ double PMStruc::MatchDttoPosPymSimple(const vector<vector<pair<LInt,LInt> > >& v
 	for (int i = 0; i < paOrders.size(); i++)
 	{
 			
-//				int tinx=*LevelLimit+paOrders[i][j].second;
-				//MatchDttoPosPymSimple(const vector<vector<pair<int,int> > >& vecFSs,const vector<vector<double>>& poss,const vector<int>& indx,bool ExcluMode,vector<double>& every);
-				//int matchDToOneLvSimple(const vector<vector<pair<int,int> > >& vecFSs,const vector<vector<double>>& poss,const vector<int>& indx ,int levl, bool ExcluMode,vector<bool>& used,vector<int>& every );
-				int sscore= matchDToOneLvSimple(vecFSs,poss,indx,paOrders[i].first, paOrders[i].second,ExcluMode,used,every);
-				if(!inverse)
-				reslt+=sscore*weights[paOrders[i].first][paOrders[i].second];
-					else
-				reslt+=sscore*(1.0/weights[paOrders[i].first][paOrders[i].second]);
+			int sscore= matchDToOneLvSimple(vecFSs,poss,indx,paOrders[i].first, paOrders[i].second,ExcluMode,used,every);
+			if(!inverse)
+			reslt+=sscore*weights[paOrders[i].first][paOrders[i].second];
+				else
+			reslt+=sscore*(1.0/weights[paOrders[i].first][paOrders[i].second]);
 
 	}
 	
@@ -1015,7 +1016,7 @@ double PMStruc::MatchDttoPosPymSimple(const vector<vector<pair<LInt,LInt> > >& v
 
 	
 
-	reslt/=sqrt(siz);
+	reslt/=siz;
 	if(inverse)
 	{
 		
@@ -1318,7 +1319,7 @@ int PMStruc::initPymWithABs(vector<vector<pair<double,double> > > abS,int dimens
 		}
 
 		weights.resize(LevelLimit*LevelLimit,0.0);
-		unordered_map<int,unordered_map<int,int>> tum;
+		mapType<int,mapType<int,int>> tum;
 		pym.resize(LevelLimit*LevelLimit,tum);
 		
 		for (int i = 0; i < LevelLimit*LevelLimit; i++)
@@ -1372,12 +1373,12 @@ int PMStruc::AddoneData(vector<double> data,bool AddOrMinus)
 			}
 			else
 			{
-				unordered_map<LInt,int> temlv;
+				mapType<LInt,int> temlv;
 				if(AddOrMinus)
 					temlv.insert(pair<LInt,int>(secI,1));
 				else
 					temlv.insert(pair<LInt,int>(secI,-1));
-				pym[levi][levj].insert(pair<LInt,unordered_map<LInt,int> >(fisI,temlv));
+				pym[levi][levj].insert(pair<LInt,mapType<LInt,int> >(fisI,temlv));
 			}
 		}
 	//	int lvel=levi;
@@ -1467,8 +1468,8 @@ double PMStruc:: giveNewPyramidMatchScore(const vector<vector<double > >& vecFSs
 double PMStruc::givePyramidMatchScoreSpecial(const vector<vector<pair<LInt,LInt> > >& vecFSs,const vector<vector<double>>& poss,const vector<int>& indx,bool ExcluMode,vector<pair<int,int> >& every)
 {
 	assert(indx.size()==poss.size());
-	//	double MatchDttoPosPymSimple(const vector<vector<pair<int,int> > >& vecFSs,const vector<vector<double>>& poss,const vector<int>& indx,bool ExcluMode,vector<int>& every,bool inverse);
-	return MatchDttoPosPymSimple(vecFSs,poss,indx,ExcluMode,every,true);
+	//return  MatchDttoPosPymSimple(const vector<vector<pair<int,int> > >& vecFSs,const vector<vector<double>>& poss,const vector<int>& indx,bool ExcluMode,bool inverse);
+	return MatchDttoPosPymSimple(vecFSs,poss,indx,ExcluMode,every,false);
 
 }
 

@@ -1,13 +1,18 @@
 #include "VecDeal.h"
+#include <map>
+using namespace std;
+
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
 #endif
+
+#define mapType unordered_map
 
 #include "..\common\bigint\BigIntegerLibrary.hh"
 
 typedef __int64 LInt;
 
-
+//typedef map mapType;
 
 static vector<vector<pair<int,int> > > genPAorders(int n)
 {
@@ -37,6 +42,20 @@ static vector<vector<pair<int,int> > > genPAorders(int n)
 };
 
 
+static vector<pair<int,int> >  genPAordersNew(int n,int ann)
+{
+	vector<pair<int,int> >  rslt;
+	for (int i = n-1; i >=0; i--)
+	{
+		for (int j = ann-1; j >=0; j--)
+		{
+			if(i>=1)
+			rslt.push_back(pair<int,int>(i,j) );
+		}
+	}
+	return rslt;
+};
+
 static vector<pair<int,int> >  genPAorders(int n,int ann)
 {
 	int m=(n-1)+(ann-1);
@@ -52,9 +71,10 @@ static vector<pair<int,int> >  genPAorders(int n,int ann)
 	
 		int t=i-s;
 
-		while ( (t>=1) && (s<=(n-1)) && (t<=(ann-1)) && (s>=0) )
+		while ( (t>=0) && (s<=(n-1)) && (t<=(ann-1)) && (s>=0) )
 		{
-			rslt.push_back(pair<int,int>(s,t));
+			if(s>=2)
+				rslt.push_back(pair<int,int>(s,t));
 			s-=1;
 			t=i-s;
 		}
@@ -136,7 +156,7 @@ private:
 	vector<int> dataToAIntVec(int alvel,int plvel,vector<double> data);
 
 
-	vector<vector<  unordered_map<LInt,unordered_map<LInt,int> > > > pym;
+	vector<vector<  mapType<LInt,mapType<LInt,int> > > > pym;
 
 
 	vector<vector<  map<vector<int>, int > > > newpym;

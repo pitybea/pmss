@@ -11,8 +11,109 @@
 #include "adaboost.h"
 #include "../../../fileIoinclude/FileInOut.h"
 
+#define E_constant 2.71828183
+#define sqrt_two_PI_inverse  0.3989422 
+
+#define STandDErive 10.0
+#define codenum 1
+
+pair<vector<vector<double> >,vector<pair<int,int> >> getHoughCodesfromoneFile(string s)
+{
+	
+	
+		vector<vector<double> > fea;
+		vector<pair<int,int> > pos;
+		fea.clear();
+		pos.clear();
+		FILE* fp;
+		FILE* ft;
+		fp=fopen((s+"_num.txt").c_str(),"r");
+		int tnum;
+		fscanf(fp,"%d",&tnum);
+		fclose(fp);
+
+		fp=fopen((s+"_fea.txt").c_str(),"r");
+		ft=fopen((s+"_pos.txt").c_str(),"r");
+		for (int i = 0; i < tnum; i++)
+		{
+			vector<double> tvec;
+			tvec.resize(128,0.0);
+			pair<int,int> tpos;
+			for (int j = 0; j < 128; j++)
+			{
+				fscanf(fp,"%lf ",&tvec[j]);
+
+				
+			}
+			fscanf(ft,"%d %d\n",&tpos.first,&tpos.second);
+			fscanf(fp,"\n");
+
+			fea.push_back(tvec);
+			pos.push_back(tpos);
+		}
+		fclose(fp);
+		fclose(ft);
+
+		return pair<vector<vector<double> >,vector<pair<int,int> >>(fea,pos);
+}
+
+pair<vector<vector<double> >, vector<vector<int>  > > getHoughKms(int k)
+{
+	vector<vector<double> > kctns;
+	kctns.resize(k,vector<double>(128,0.0));
+
+	vector<vector<int> > kbls;
+	
+	
+	int tnum;
+	FILE* fp;
+	fp=fopen(("kms"+to_string(k)+".txt").c_str(),"r");
+	fscanf(fp,"%d\n",&tnum);
+	for (int i = 0; i < tnum; i++)
+	{
+		for (int j = 0; j < 128; j++)
+			fscanf(fp,"%lf ",&kctns[i][j]);
+	
+		fscanf(fp,"\n");
+	}
+
+	kbls.resize(tnum,vector<int>());
+
+	fclose(fp);
+	fp=fopen(("klbs"+to_string(k)+".txt").c_str(),"r");
+	fscanf(fp,"%d\n",&tnum);
+	for (int i = 0; i < tnum; i++)
+	{
+		int ti;
+		fscanf(fp,"%d\n",&ti);
+		kbls[ti-1].push_back(i);
+	}
+	fclose(fp);
 
 
+	return pair<vector<vector<double> >, vector<vector<int>  > >(kctns,kbls);
+}
+
+pair<vector<vector<double> >,vector<pair<int,int> >> getHoughCode()
+{
+
+	vector<vector<double> > fea;
+	vector<pair<int,int> > pos;
+	fea.clear();
+	pos.clear();
+	vector<string> flNms;
+	flNms.clear();
+	flNms=fileIOclass::InVectorString("positive.lst");
+	for(auto s : flNms)
+	{
+		
+		auto ss= getHoughCodesfromoneFile(s);
+		fea.insert(fea.end(),ss.first.begin(),ss.first.end());
+		pos.insert(pos.end(),ss.second.begin(),ss.second.end());
+
+	}
+	return pair<vector<vector<double> >,vector<pair<int,int> >>(fea,pos);
+}
 
 pair<vector<vector<double> >,vector<vector<vector<double> > > > getAllfeas(int dim)
 {
@@ -85,6 +186,9 @@ void newgivescoreshelp(PMStruc pedmd,int dim,string s)
 	
 	}
 }
+
+
+
 vector<double> givescoreshelp(PMStruc& pedmd,int dim,string s,bool ada,bool another,adaboost machine)
 {
 	vector<string> flNms;
@@ -107,12 +211,20 @@ vector<double> givescoreshelp(PMStruc& pedmd,int dim,string s,bool ada,bool anot
 	
 		score=pedmd.givePyramidMatchScore(selectVecButLstTwo ( tvd,dim),false,result);
 	
+		for(auto ss: result)
+			printf("%lf ",ss/siz);
+
+		printf("\n");
+
+
 		rslt[i]=score;
 //		printf("%lf\n",score);
 
 	}
 	return rslt;
 }
+
+
 
 void givescores(PMStruc& pedmd,int dim,bool ada,bool another)
 {
@@ -129,10 +241,13 @@ void givescores(PMStruc& pedmd,int dim,bool ada,bool another)
 	pos=	givescoreshelp(pedmd,dim,"positive.lst",ada,another,machine);
 	neg=  givescoreshelp(pedmd,dim,"negative.lst",ada,another,machine);
 
-		printPR(pos,neg);
+	printPR(pos,neg);
 
 	
 }
+
+
+
 void givescoressplit(PMStruc pedmd,int dim,bool ada,bool another)
 {
 	
@@ -141,8 +256,7 @@ void givescoressplit(PMStruc pedmd,int dim,bool ada,bool another)
 	adaboost machine;
 
 //	FILE* fp=fopen("adabMach.txt","r");
-//	machine.loadFromfile(fp);
-//	fclose(fp);
+
 	newgivescoreshelp(pedmd,dim,"positive.lst");
 	newgivescoreshelp(pedmd,dim,"negative.lst");
 	
@@ -567,6 +681,9 @@ int testposspe()
 	return 0;
 }
 
+
+
+
 int benchmark()
 {
 
@@ -584,6 +701,11 @@ int benchmark()
 	PMStruc pedmd(5,5);
 
 	pedmd.generatePymFromdata(ad.first,dim);
+
+	//PMStruc::printTofile(pedmd,"pmsuiuc");
+
+	//PMStruc apd;
+	//PMStruc::loadFromfile(apd,"pmsuiuc");
 	//pedmd.GeneratePosWeightWithParameter(0.0);
 	givescores(pedmd,dim,false,false);
 
@@ -602,7 +724,7 @@ int splitmethod()
 
 
 
-	PMStruc pedmd(5,5);
+	PMStruc pedmd(4,6);
 //	printf("-------------******************-----(%d)--------**********************\n",dim);
 	pedmd.generatePymFromdata(data,dim);
 	givescoressplit(pedmd,dim,false,false);
@@ -762,16 +884,181 @@ int trainweights()
 	return 0;
 }
 
-int main()
+
+
+
+
+
+
+
+
+
+
+double vote(pair<int,int> a,pair<int,int> b)
+{
+	double d=(a.first-b.first)*(a.first-b.first)+(a.second-b.second)*(a.second-b.second);
+
+	double result=sqrt_two_PI_inverse*STandDErive*pow(E_constant,(0-d/(2*STandDErive*STandDErive)));
+	return result;
+}
+
+
+double dissimple(const vector<double>& a ,const vector<double>& b)
+{
+	double rslt=0.0;
+
+	for (int i = 0; i < a.size(); i++)
+	{
+		rslt+=(a[i]-b[i])*(a[i]-b[i]);
+	}
+	return rslt;
+}
+
+double giveRealHoughScoreKmeans(const pair<vector<vector<double> >, vector<pair<int,int> > >& codebook, const pair<vector<vector<double> >,vector<vector<int> > >& kms, const pair<vector<vector<double> >, vector<pair<int,int> > >& img)
 {
 
+	double rslt=0.0;
+	for (int i = 0; i < img.first.size(); i++)
+	{
+	//	vector<double> diss;
+		//vector<int> indx;
+
+		//diss.resize(kms.first.size(),0.0);
+		//indx.resize(codebook.first.size(),0);
+		double mindis=dissimple(img.first[i],kms.first[0]);
+		int minIndx=0;
+
+		for (int j = 1; j < kms.first.size(); j++)
+		{
+			double tdis=dissimple(img.first[i],kms.first[j]);
+
+			if (tdis<mindis)
+			{
+				mindis=tdis;
+				minIndx=j;
+			}
+			//indx[j]=j;
+		}
+		
+//		FromSmall(diss,(int)diss.size(),indx);
+
+
+		
+		double tdd(0.0);
+		for (int j = 0; j < kms.second[minIndx].size() && j<3; j++)
+		{
+			tdd+=vote(img.second[i],codebook.second[ kms.second[minIndx][j] ] );
+		}
+		tdd/=kms.second[minIndx].size()+0.0001;
+
+		rslt+=tdd;
+	}
+	rslt/=img.first.size()+0.0001;
+	return rslt;
+
+}
+
+double giveRealHoughScore(const pair<vector<vector<double> >, vector<pair<int,int> > >& codebook, const pair<vector<vector<double> >, vector<pair<int,int> > >& img)
+{
+
+	double rslt=0.0;
+	for (int i = 0; i < img.first.size(); i++)
+	{
+		vector<double> diss;
+		vector<int> indx;
+
+		diss.resize(codebook.first.size(),0.0);
+		indx.resize(codebook.first.size(),0);
+		
+		for (int j = 0; j < codebook.first.size(); j++)
+		{
+			diss[j]=dissimple(img.first[i],codebook.first[j]);
+			indx[j]=j;
+		}
+		
+		FromSmall(diss,(int)diss.size(),indx);
+		
+		double tdd(0.0);
+		for (int j = 0; j < codenum; j++)
+		{
+			tdd+=vote(img.second[i],codebook.second[indx[j]] );
+		}
+		tdd/=codenum;
+
+		rslt+=tdd;
+	}
+	rslt/=img.first.size()+0.0001;
+	return rslt;
+	//return 0.0;
+}
+
+
+
+vector<double> giveshoughcoreshelp(const pair<vector<vector<double> >, vector<pair<int,int> > >& codebook ,string s,const pair<vector<vector<double> >,vector<vector<int> > >& kms, bool kmon)
+{
+	vector<double> rslt;
+
+	vector<string> flNms;
+	flNms.clear();
+	flNms=fileIOclass::InVectorString(s.c_str());
+	rslt.resize(flNms.size(),0.0);
+	for (int i = 0; i < flNms.size(); i++)
+	{
+		auto s=flNms[i];
+		auto ss= getHoughCodesfromoneFile(s);
+		double score;
+		if(kmon)
+			score=giveRealHoughScoreKmeans (codebook,kms,ss);		
+		else
+			score=giveRealHoughScore(codebook,ss);
+		printf("%lf\n",score);
+		rslt[i]=score;
+	}
+
+	return rslt;
+}
+
+void giveHoughscores(const pair< vector<vector<double>>,vector<pair<int,int> > >& codebook,const pair<vector<vector<double> >,vector<vector<int> > >& kms, bool kmon )
+{
+	vector<double> pos;
+	vector<double> neg;
+
+	pos=giveshoughcoreshelp(codebook,"positive.lst",kms,kmon);
+	neg=giveshoughcoreshelp(codebook,"negative.lst",kms,kmon);
+	printPR(pos,neg);
+	
+}
+int houghBenchmark(bool kms)
+{
+	_chdir("E:\\carData\\TrainImages");
+
+	auto ad=getHoughCode();
+	_chdir("E:\\carData\\TestImages\\mytest");
+	if(!kms)
+	giveHoughscores(ad,pair<vector<vector<double> >,vector<vector<int> > >(),false);
+	else
+	{
+		auto sd=getHoughKms(25);
+		giveHoughscores(ad,sd,true);
+	}
+	return 0;
+}
+
+
+/**/
+
+
+int main()
+{
+//	genPAorders(5,5);
 //	vector<vector<pair<int,int> > > r;
 //	r=genPAorders(6);
 
 //	PMStruc pedmd(5);
-	benchmark();
-
-
+//	genPAorders(4,6);
+//	Houghbenchmark();
+	houghBenchmark(true);
+//	benchmark(true);
 //	gentraining();
 
 //	splitmethod();

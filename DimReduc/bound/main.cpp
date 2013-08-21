@@ -199,7 +199,7 @@ int main(int argc,char* argv[])
 
 	string s(tD);
 
-	toPtSet (s,pcamatrix);
+	dimrc (s,pcamatrix);
 
 
 	return 0; 

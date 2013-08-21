@@ -8,8 +8,8 @@ using namespace std;
 
 #define PT_per_L 40.0
 #define Stasdd_Num 26
-#define stdd_X 256.0
-#define stdd_Y 128.0
+#define stdd_X 100.0
+#define stdd_Y 40.0
 #define featureDimension 128
 
 #define feaNumlimit 21
@@ -30,6 +30,26 @@ struct obj
 		rslt.pos=ts;
 	};
 	
+};
+
+struct sDetRec
+{
+	int w;
+	int h;
+	int xstp;
+	int ystp;
+	static void initOne(FILE* fp,sDetRec &rslt)
+	{
+		
+		fscanf(fp,"%d %d %d %d",&rslt.w,&rslt.h,&rslt.xstp,&rslt.ystp);
+		
+	};
+	static void printOne(FILE* fp,const sDetRec &rslt)
+	{
+		
+		fprintf(fp,"%d %d %d %d",rslt.w,rslt.h,rslt.xstp,rslt.ystp);
+		
+	};
 };
 
 struct DetRec
@@ -69,6 +89,80 @@ obj smaller(obj to)
 	o.ymax-=xs;
 	o.ymin+=xs;
 	return o;
+}
+struct sdtctHy
+{
+	int sx;
+	int sy;
+	int w;
+	int h;
+
+	
+};
+
+
+
+static void setUsed(sdtctHy o, map<int,map<int,bool> >& daset )
+{
+
+	
+	int xmin(o.sx),ymin(o.sy),ymax(o.sy+o.h),xmax(o.sx+o.w);
+
+	
+	auto st=daset.lower_bound (ymin);
+
+	while( st!=daset.end() && st->first<=ymax )
+	{
+		auto st1=st->second.lower_bound(xmin);
+
+		while ( st1!=st->second.end() && st1->first<=xmax  )
+		{
+		
+			daset[st->first][st1->first]=true;
+			
+			st1++;
+		}
+		st++;
+	}
+
+	
+}
+
+template<class T>
+static pair<vector<vector<int> >, vector<T> > rangequery(obj o,const map<int,map<int,T> >& daset, const map<int, map<int, bool> >& used )
+{
+
+	
+	int xmin(o.xmin),ymin(o.ymin),ymax(o.ymax),xmax(o.xmax);
+
+	vector<vector<int> > r1;
+
+	vector<T> rslt;
+	rslt.clear();
+
+	auto st=daset.lower_bound (ymin);
+
+	while( st!=daset.end() && st->first<=ymax )
+	{
+		auto st1=st->second.lower_bound(xmin);
+
+		while ( st1!=st->second.end() && st1->first<=xmax  )
+		{
+			vector<int> tvi(2,0);
+			tvi[0]=st1->first;
+			tvi[1]=st->first;
+			
+			if( used.at( tvi[1] ).at( tvi[0] )==false)
+			{
+				r1.push_back(tvi);
+				rslt.push_back(st1->second);
+			}
+			st1++;
+		}
+		st++;
+	}
+
+	return pair<vector<vector<int> >, vector<T>> (r1, rslt);
 }
 
 template<class T>
@@ -115,6 +209,13 @@ struct triple
 };
 
 
+template<class T1,class T2, class T3>
+struct striple
+{
+	T1 first;
+	T2 second;
+	T3 third;
+};
 
 
 
@@ -402,5 +503,7 @@ struct dtctHy
 	};
 
 };
+
+
 
 
